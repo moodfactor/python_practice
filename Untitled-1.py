@@ -14,3 +14,20 @@ x.display()
 y.display()
 print(MixedNames.display(y))
 print(MixedNames.data)
+
+
+class NextClass:
+    def printer(self, text):
+        self.message = text
+        print(self.message)
+
+
+x = NextClass()
+x.printer("instance call")
+x.message
+
+NextClass.printer(x, "class call")
+x.message
+
+print(NextClass.printer(x, "class call"))
+print(x.message)
