@@ -1,0 +1,23 @@
+AddLocationForm:
+
+<AddLocationForm@BoxLayout>:
+    orientation: "vertical"
+    BoxLayout: 
+        height: "40dp"
+        size_hint_y: None
+        TextInput:
+            size_hint_x: 50
+        Button:
+            text: "Search"
+            size_hint_x:  25
+        Button:
+            text: "Current Location"
+            size_hint_x: 25
+    RV:
+        viewclass: "Label"
+        RecycleBoxLayout:
+            default_size: None, dp(56)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
