@@ -1,0 +1,15 @@
+<Controller>:
+    label_wid: my_custom_label
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+
+        Button:
+            text: 'my controller info is: ' + root.info
+            on_press: [print (s) for s in ('fff')]
+
+        Label:
+            id: my_custom_label
+            text: 'My label before button press'
+            pos: (50, 100)
