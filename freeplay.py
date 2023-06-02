@@ -1,3 +1,4 @@
+from itertools import count
 def get_weather_data(city_name):
   """
   This function fetches weather data from OpenWeatherMap API for a given city name.
@@ -45,3 +46,12 @@ def outer():
     print("outer:", x)
 outer()
 print(x)
+
+print("x" * 85)
+
+fresh_fruit = {'apple': 10,'banana': 8,'lemon': 5,}
+if (count:= fresh_fruit.get('lemon', 0)) > 4:
+    print(count)
+a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+assert a[0:5] == a[:5]
+assert a[-3:] == a[5:]

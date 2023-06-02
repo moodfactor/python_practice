@@ -1,0 +1,22 @@
+#:kivy 1.0
+#:import ProgressBar kivy.uix.progressbar.ProgressBar
+
+<RadioScreen@GridLayout>:
+    GridLayout:
+        Label:
+            id:label_id
+            text: root.text_value
+
+        Button:
+            id:play_button
+            text:"play"
+            onprss:"Hello"
+        
+        Button:
+            id:stop_button
+            text:"stop"
+
+        ProgressBar:
+            id:progress_bar
+            value:50
+            max:100        
