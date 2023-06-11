@@ -4,5 +4,6 @@
     },
     "python.formatting.provider": "none",
     "notebook.formatOnSave.enabled": false,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "python.analysis.typeCheckingMode": "basic"
 }
