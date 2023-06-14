@@ -291,3 +291,291 @@ p = Person("Ahmed")
 p.lazy_name
 print(p.lazy_name)
 
+class Structure:
+    _fields = []
+    def __init__(self, *args):
+        if len(args) != len(self._fields):
+            raise TypeError("Expected {} arguments".format(len(self._fields)))
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
+import math
+
+if __name__ == "__main__":
+    class Stock(Structure):
+        _fields = ["name", "shares", "price"]
+    class Point(Structure):
+        _fields = ["x", "y"]
+    class Circle(Structure):
+        _fields = ["radius"]
+        def area(self):
+            return math.pi * self.radius ** 2
+        
+    s = Stock("ACME", 50, 91.1)
+    p = Point(2, 3)
+    c = Circle(2)
+    print(s.name, s.shares, s.price)
+        
+from abc import ABCMeta, abstractmethod
+
+class IStream(metaclass=ABCMeta):
+    @abstractmethod
+    def read(self, maxbytes=-1):
+        pass
+    
+    @abstractmethod
+    def write(self, data):
+        pass       
+
+def serialize(obj, stream):
+    if not isinstance(stream, IStream):
+        raise TypeError("Expected an IStream")
+    obj.serialize(stream)
+
+import io 
+
+IStream.register(io.IOBase)
+
+class FileStream(IStream):
+    def __init__(self, name):
+        self.name = name
+f = open('foo.txt', 'w')
+print(isinstance(f, IStream))
+f.close
+
+# Base class. Uses a descriptor to set a value
+class Descriptor:
+    
+    def __init__(self, name= None, **opts):
+        self.name = name
+        for key, value in opts.items():
+            setattr(self, key, value)
+    
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
+
+# Descriptor for enforcing types on attributes
+class Typed(Descriptor):
+    expected_type = type(None)
+    def __set__(self, instance, value):
+        if not isinstance(value, self.expected_type):
+            raise TypeError('Expected ' + str(self.expected_type))
+        super().__set__(instance, value)
+        
+# Descriptor for enforcing values
+class Unsigned(Descriptor):
+    def __set__(self, instance, value):
+      #  if value < 0:
+        #    raise ValueError('Expected >= 0')
+        super().__set__(instance, value)
+
+class MaxSized(Descriptor):
+    def __init__(self, name=None, **opts):
+        if 'size' not in opts:
+            raise TypeError('missing size option')
+        super().__init__(name, **opts)
+    def __set__(self, instance, value):
+        if len(value) >= self.size:
+            raise ValueError('size must be < ' + str(self.size))
+        super().__set__(instance, value)
+
+class Worker(Typed):
+    expected_type = str
+
+class UnsignedWorker(Worker, Unsigned):
+    pass
+
+class MaxSizedWorker(Worker, MaxSized):
+    pass
+
+class TypedWorker(Worker, Typed):
+    expected_type = str
+
+class Workerimp:
+    name = MaxSizedWorker('name', size=20)
+    age = UnsignedWorker('age')
+    pay = TypedWorker('pay', expected_type=str)
+    
+    def __init__(self, name, age, pay):
+        self.name = name
+        self.age = age
+        self.pay = pay
+
+s = Workerimp('Ahmed', '30', '5000')
+print(s.name)
+s.age = '5'
+s.pay = '55000'
+print(s.__dict__.items())
+
+from collections.abc import Iterable
+class A(Iterable):
+    def __init__(self):
+        self.a = 1
+        self.b = 2
+        self.c = 3
+    def __iter__(self):
+        return iter([self.a, self.b, self.c])
+
+a = A()
+print(a.__dict__)
+
+import collections.abc
+import bisect
+
+class SortedItems(collections.abc.Sequence):
+    def __init__(self, initial=None):
+        self._items = sorted(initial) if initial else []
+        
+    # Required sequence methods
+    def __getitem__(self, index):
+        return self._items[index]
+    
+    def __len__(self):
+        return len(self._items)
+    
+    # Method for adding an item in the right location
+    def add(self, item):
+        bisect.insort(self._items, item)
+        
+items = SortedItems([5, 1, 3])
+print(items.__dict__)
+items.add(2)
+print(items.__dict__)
+
+import time
+
+class Date:
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    @classmethod 
+    def today(cls):
+       t = time.localtime()
+       return cls(t.tm_year, t.tm_mon, t.tm_mday)
+   
+a = Date(1989, 6, 10)
+print(str(a))
+a = Date.today()
+print(a.__dict__)
+
+class LoggedMappingMixin:
+    
+    __slots__ = ()
+    
+    def __getitem__(self, key):
+        print('Getting ' + str(key))
+        return super().__getitem__(key)
+    
+    def __setitem__(self, key, value):
+        print('Setting {} = {!r}'.format(key, value))
+        return super().__setitem__(key, value)
+    
+    def __delitem__(self, key):
+        print('Deleting ' + str(key))
+        return super().__delitem__(key)
+    
+class SetOnceMappingMixin:
+    
+    __slots__ = ()
+    
+    def __setitem__(self, key, value):
+        if key in self:
+            raise KeyError(str(key) + ' already set')
+        return super().__setitem__(key, value)
+
+
+class SetOnceDict(SetOnceMappingMixin, dict):
+    pass
+
+d = SetOnceDict()
+d['x'] = 1
+d['y'] = 2
+print(d.__dict__)
+print(d)
+s = d['n'] = 3
+print(s)
+
+import math
+import operator
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return 'Point({!r}, {!r})'.format(self.x, self.y)
+
+    def distance(self,x,y):
+        return math.hypot(self.x - x , self.y - y)
+
+p = Point(2, 3)
+d = operator.methodcaller('distance', 0, 0)(p)
+print(d)
+
+class Node:
+    pass
+
+class UnaryOperator(Node):
+    def __init__(self, operand):
+        self.operand = operand
+        
+class BinaryOperator(Node):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+        
+class Add(BinaryOperator):
+    pass
+
+class Sub(BinaryOperator):
+    pass
+
+class Mul(BinaryOperator):
+    pass
+
+class Div(BinaryOperator):
+    pass
+
+class Negate(UnaryOperator):
+    pass
+
+class Number(Node):
+    def __init__(self, value):
+        self.value = value
+
+t1 = Sub(Number(2), Number(3))
+t2 = Mul(Number(2), t1)
+t3 = Div(t2, Number(3))
+t4 = Add(Number(1), t3)
+
+class Nodevisitor:
+    def visit(self, node):
+        methname = 'visit_' + type(node).__name__
+        meth = getattr(self, methname, None)
+        if not meth:
+            meth = self.generic_visit
+        return meth(node)
+    
+    def generic_visit(self, node):
+        raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
+
+class Evaluator(Nodevisitor):
+    def visit_Number(self, node):
+        return node.value
+    
+    def visit_Add(self, node):
+        return self.visit(node.left) + self.visit(node.right)
+    
+    def visit_Sub(self, node):
+        return self.visit(node.left) - self.visit(node.right)
+    
+    def visit_Mul(self, node):
+        return self.visit(node.left) * self.visit(node.right)
+    
+    def visit_Div(self, node):
+        return self.visit(node.left) / self.visit(node.right)
+    
+    def visit_Negate(self, node):
+        return -self.visit(node.operand)        
